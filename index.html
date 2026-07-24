@@ -67,7 +67,7 @@
       min-height: 100vh;
     }
 
-    /* Wiggle Animation for Modals & Interactive Boxes */
+    /* Wiggle Animation for Modals & Cards */
     @keyframes wiggle {
       0% { transform: scale(0.9) rotate(0deg); opacity: 0; }
       25% { transform: scale(1.02) rotate(-1.5deg); opacity: 1; }
@@ -85,9 +85,9 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
+      gap: 5px;
       margin-bottom: 15px;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
     }
 
     .btn-pill {
@@ -103,6 +103,7 @@
       align-items: center;
       gap: 4px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+      white-space: nowrap;
     }
 
     .btn-pill:hover {
@@ -110,25 +111,30 @@
       color: var(--gold-accent);
     }
 
+    .btn-pill span.sparkle {
+      color: var(--gold-accent);
+    }
+
     .music-btn {
-      padding: 4px 10px 4px 6px;
+      padding: 4px 8px 4px 5px;
     }
 
     .vinyl-icon {
-      width: 22px;
-      height: 22px;
+      width: 20px;
+      height: 20px;
       background: #222;
       border-radius: 50%;
       border: 2px solid var(--gold-accent);
       display: flex;
       align-items: center;
       justify-content: center;
+      flex-shrink: 0;
     }
 
     .vinyl-icon::after {
       content: '';
-      width: 6px;
-      height: 6px;
+      width: 5px;
+      height: 5px;
       background: var(--gold-accent);
       border-radius: 50%;
     }
@@ -148,11 +154,11 @@
 
     .music-title {
       font-weight: 600;
-      font-size: 0.75rem;
+      font-size: 0.72rem;
     }
 
     .music-sub {
-      font-size: 0.62rem;
+      font-size: 0.58rem;
       color: var(--text-muted);
       font-style: italic;
     }
@@ -218,7 +224,7 @@
     .photo-card {
       background: var(--card-bg);
       padding: 12px;
-      border-radius: 16px;
+      border-radius: 20px;
       border: 1px solid var(--border-color);
       box-shadow: 0 8px 20px rgba(0,0,0,0.04);
       margin-bottom: 25px;
@@ -228,7 +234,7 @@
     .photo-container {
       width: 100%;
       height: 380px;
-      border-radius: 12px;
+      border-radius: 14px;
       overflow: hidden;
       position: relative;
       background: #f0f0f0;
@@ -244,13 +250,66 @@
       position: absolute;
       bottom: 15px;
       right: 15px;
-      background: rgba(0,0,0,0.5);
+      background: rgba(0,0,0,0.55);
       backdrop-filter: blur(4px);
       color: #fff;
       border: 1px solid rgba(255,255,255,0.4);
       padding: 6px 12px;
       border-radius: 15px;
       font-size: 0.75rem;
+      cursor: pointer;
+    }
+
+    /* Grid Section for Vision Cards */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 18px;
+      margin-bottom: 30px;
+    }
+
+    .board-card {
+      background: var(--card-bg);
+      border-radius: 18px;
+      padding: 18px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+    }
+
+    .card-title {
+      font-family: var(--font-card-title);
+      font-size: 1.15rem;
+      color: var(--gold-accent);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      outline: none;
+    }
+
+    .card-content {
+      font-size: 0.88rem;
+      line-height: 1.6;
+      color: var(--text-main);
+      outline: none;
+    }
+
+    .todo-list {
+      list-style: none;
+    }
+
+    .todo-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+      font-size: 0.88rem;
+    }
+
+    .todo-item input[type="checkbox"] {
+      accent-color: var(--gold-accent);
+      width: 16px;
+      height: 16px;
       cursor: pointer;
     }
 
@@ -335,7 +394,6 @@
       margin-top: 10px;
     }
 
-    /* Hidden File Input */
     #photoInput { display: none; }
   </style>
 </head>
@@ -346,13 +404,13 @@
     <button class="btn-pill music-btn" id="musicToggle">
       <div class="vinyl-icon" id="vinylIcon"></div>
       <div class="music-info">
-        <div class="music-title">Play Music ✦</div>
+        <div class="music-title">Play Music <span class="sparkle">✦</span></div>
         <div class="music-sub">Cozy Lofi Vibes</div>
       </div>
     </button>
-    <button class="btn-pill" id="themeBtn">✦ Theme</button>
-    <button class="btn-pill" id="fontBtn">✦ Font</button>
-    <button class="btn-pill" id="darkBtn">✦ Dark</button>
+    <button class="btn-pill" id="themeBtn"><span class="sparkle">✦</span> Theme</button>
+    <button class="btn-pill" id="fontBtn"><span class="sparkle">✦</span> Font</button>
+    <button class="btn-pill" id="darkBtn"><span class="sparkle">✦</span> Dark</button>
   </div>
 
   <!-- Weather Indicator -->
@@ -373,13 +431,46 @@
     <p class="main-quote" contenteditable="true" id="mainQuote">"Type your favorite quote here..." ✦</p>
   </div>
 
-  <!-- Featured Image -->
+  <!-- Featured Image Box -->
   <div class="photo-card">
     <div class="photo-container">
       <img id="featuredImg" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80" alt="Vision Board Photo">
       <button class="change-photo-btn" onclick="document.getElementById('photoInput').click()">✦ Change Photo</button>
       <input type="file" id="photoInput" accept="image/*" onchange="uploadImage(event)">
     </div>
+  </div>
+
+  <!-- Vision Board Content Boxes -->
+  <div class="cards-grid">
+    
+    <!-- Affirmations Box -->
+    <div class="board-card">
+      <div class="card-title" contenteditable="true">✦ Daily Affirmations</div>
+      <div class="card-content" contenteditable="true">
+        • I am worthy of attracting everything I dream of.<br>
+        • Peace, success, and continuous growth surround me.<br>
+        • Every day brings new opportunities to shine.
+      </div>
+    </div>
+
+    <!-- Goals Checklist Box -->
+    <div class="board-card">
+      <div class="card-title" contenteditable="true">✦ Focus & Goals</div>
+      <ul class="todo-list">
+        <li class="todo-item"><input type="checkbox"> <span contenteditable="true">Build my dream brand & business</span></li>
+        <li class="todo-item"><input type="checkbox"> <span contenteditable="true">Travel to aesthetic places</span></li>
+        <li class="todo-item"><input type="checkbox"> <span contenteditable="true">Maintain physical & mental peace</span></li>
+      </ul>
+    </div>
+
+    <!-- Bucket List / Notes Box -->
+    <div class="board-card">
+      <div class="card-title" contenteditable="true">✦ Manifestations</div>
+      <div class="card-content" contenteditable="true">
+        Write your bucket lists, dream travels, or personal reminders here... 🌿✨
+      </div>
+    </div>
+
   </div>
 
   <!-- Audio Player -->
@@ -409,6 +500,14 @@
         <div class="grid-options">
           <button class="opt-btn" style="font-family: 'Caveat';" onclick="setFont('header', '\'Caveat\', cursive')">Caveat</button>
           <button class="opt-btn" style="font-family: 'Dancing Script';" onclick="setFont('header', '\'Dancing Script\', cursive')">Dancing</button>
+        </div>
+      </div>
+
+      <div class="option-group">
+        <span class="option-label">Card Titles Font</span>
+        <div class="grid-options">
+          <button class="opt-btn" style="font-family: 'Playfair Display';" onclick="setFont('card', '\'Playfair Display\', serif')">Playfair</button>
+          <button class="opt-btn" style="font-family: 'Cinzel';" onclick="setFont('card', '\'Cinzel\', serif')">Cinzel</button>
         </div>
       </div>
 
@@ -453,7 +552,7 @@
       }
     });
 
-    // Modal Control
+    // Modal Controls
     const themeModal = document.getElementById('themeModal');
     const fontModal = document.getElementById('fontModal');
 
@@ -478,6 +577,8 @@
     function setFont(type, fontCss) {
       if (type === 'header') {
         document.documentElement.style.setProperty('--font-header', fontCss);
+      } else if (type === 'card') {
+        document.documentElement.style.setProperty('--font-card-title', fontCss);
       } else if (type === 'body') {
         document.documentElement.style.setProperty('--font-body', fontCss);
       }

@@ -12,15 +12,15 @@
 
     <style>
         :root {
-            /* DEFAULT THEME: CREAM WHITE ☁️ */
+            /* DEFAULT THEME: CREAM WHITE */
             --bg-color: #fdfbf7;
             --card-white: #fffdfb;
             --card-pink: #f4eee5;
             --card-black: #1e1c1b;
             --text-color: #2b2b2b;
             --accent-gold: #c5a059;
+            --font-main-title: 'Caveat', cursive;
             --font-title: 'Playfair Display', serif;
-            --font-hand: 'Caveat', cursive;
             --font-body: 'Montserrat', sans-serif;
             --shadow-soft: 0 8px 20px rgba(180, 170, 150, 0.12);
             --tape-color: rgba(230, 225, 210, 0.75);
@@ -129,7 +129,7 @@
 
         .rain-drop {
             position: absolute;
-            background: linear-gradient(transparent, rgba(135, 206, 235, 0.7));
+            background: linear-gradient(transparent, rgba(197, 160, 89, 0.6));
             width: 2px; height: 25px;
             animation: fall 0.8s linear infinite;
         }
@@ -154,7 +154,7 @@
             background: var(--card-white);
             color: var(--text-color);
             border: 1px solid var(--accent-gold);
-            padding: 6px 11px;
+            padding: 6px 13px;
             border-radius: 20px;
             font-size: 0.75rem;
             cursor: pointer;
@@ -163,6 +163,7 @@
             white-space: nowrap;
         }
 
+        .control-btn span.gold-icon { color: var(--accent-gold); font-weight: bold; margin-right: 3px; }
         .control-btn:hover { transform: scale(1.05); }
 
         /* VINYL PLAYER */
@@ -212,6 +213,7 @@
         .music-settings-btn {
             background: var(--card-white);
             border: 1px solid var(--accent-gold);
+            color: var(--accent-gold);
             border-radius: 50%;
             width: 26px; height: 26px;
             display: flex; align-items: center; justify-content: center;
@@ -248,7 +250,7 @@
         .weather-info { display: flex; flex-direction: column; }
         .weather-city { font-size: 0.75rem; font-weight: 600; }
         .weather-desc { font-size: 0.68rem; font-style: italic; opacity: 0.8; }
-        .weather-icon-live { font-size: 1.8rem; }
+        .weather-icon-live { font-size: 1.4rem; color: var(--accent-gold); }
 
         /* HEADER */
         .header {
@@ -259,7 +261,7 @@
         }
 
         .header h1 {
-            font-family: var(--font-hand);
+            font-family: var(--font-main-title);
             font-size: 5rem;
             line-height: 0.9;
             transform: rotate(-2deg);
@@ -271,7 +273,7 @@
         }
 
         .header .quote {
-            font-family: var(--font-hand);
+            font-family: var(--font-main-title);
             font-size: 1.6rem;
             color: var(--accent-gold);
             font-weight: 700;
@@ -393,12 +395,11 @@
             transition: transform 0.2s ease;
         }
 
-        /* AESTHETIC & TRANSPARENT PHOTO UPLOAD BADGE 📷 */
+        /* AESTHETIC TRANSPARENT PHOTO UPLOAD BADGE */
         .photo-upload-badge {
             position: absolute; bottom: 15px; right: 15px;
-            /* Translucent Glass-morphism Style */
-            background: rgba(255, 253, 251, 0.3);
-            border: 1px solid rgba(197, 160, 89, 0.4);
+            background: rgba(255, 253, 251, 0.35);
+            border: 1px solid rgba(197, 160, 89, 0.45);
             -webkit-backdrop-filter: blur(4px);
             backdrop-filter: blur(4px);
             
@@ -408,22 +409,20 @@
             box-shadow: 0 4px 10px rgba(180, 170, 150, 0.1);
             transition: transform 0.2s, background 0.2s, opacity 0.2s;
             display: flex; align-items: center; gap: 4px;
-            
-            /* Initial Semi-Transparency */
-            opacity: 0.5;
+            opacity: 0.55;
         }
 
         .photo-upload-badge:hover {
             transform: scale(1.08);
-            background: rgba(255, 253, 251, 0.65);
-            opacity: 1; /* Fully visible on hover */
+            background: rgba(255, 253, 251, 0.7);
+            opacity: 1;
         }
 
         .center-quote-card { width: 100%; text-align: center; margin-top: 10px; z-index: 5; }
-        .handwritten-quote { font-family: var(--font-hand); font-size: 1.45rem; line-height: 1.3; }
+        .handwritten-quote { font-family: var(--font-main-title); font-size: 1.45rem; line-height: 1.3; }
 
         /* CALENDAR & TO-DO */
-        .calendar-header { font-family: var(--font-hand); font-size: 1.4rem; color: var(--accent-gold); text-align: center; margin-bottom: 6px; }
+        .calendar-header { font-family: var(--font-main-title); font-size: 1.4rem; color: var(--accent-gold); text-align: center; margin-bottom: 6px; }
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; font-size: 0.75rem; }
         .cal-day-head { font-weight: bold; color: var(--accent-gold); }
         .cal-date { padding: 4px 0; border-radius: 4px; }
@@ -467,7 +466,7 @@
         .customizer-title { font-family: var(--font-title); font-size: 1.1rem; font-weight: 700; margin-bottom: 12px; color: var(--accent-gold); text-align: center; }
         
         .customizer-section { margin-bottom: 14px; }
-        .customizer-label { font-size: 0.82rem; font-weight: 600; margin-bottom: 6px; display: block; }
+        .customizer-label { font-size: 0.82rem; font-weight: 600; margin-bottom: 6px; display: block; color: var(--accent-gold); }
         
         .picker-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
         .picker-btn {
@@ -521,23 +520,23 @@
             <div class="vinyl-container" onclick="toggleMusic()">
                 <div class="vinyl-record" id="vinylDisk"></div>
                 <div class="vinyl-info">
-                    <span id="musicStatus">Play Music 🎵</span>
+                    <span id="musicStatus">Play Music <span style="color:var(--accent-gold)">✦</span></span>
                     <span class="vinyl-sub" id="musicSub">Cozy Lofi Vibes</span>
                 </div>
             </div>
-            <button class="music-settings-btn" onclick="changeMusicUrl()" title="Change Music URL">⚙️</button>
+            <button class="music-settings-btn" onclick="changeMusicUrl()" title="Change Music URL">✦</button>
         </div>
 
-        <button class="control-btn" onclick="openThemeModal()">🎨 Theme</button>
-        <button class="control-btn" onclick="openFontModal()">🔤 Font</button>
-        <button class="control-btn" onclick="toggleDarkMode()" id="modeBtn">🌙 Dark</button>
+        <button class="control-btn" onclick="openThemeModal()"><span class="gold-icon">✦</span> Theme</button>
+        <button class="control-btn" onclick="openFontModal()"><span class="gold-icon">✦</span> Font</button>
+        <button class="control-btn" onclick="toggleDarkMode()" id="modeBtn"><span class="gold-icon">✦</span> Dark</button>
     </div>
 
     <div class="board-container">
 
         <!-- WEATHER STICKER -->
         <div class="weather-floating-sticker" onclick="triggerWeatherMagic()">
-            <div class="weather-icon-live" id="weatherIcon">⛅</div>
+            <div class="weather-icon-live" id="weatherIcon">✦</div>
             <div class="weather-info">
                 <div class="weather-temp" id="weatherTemp">--°C</div>
                 <div class="weather-city" id="weatherCity">Detecting...</div>
@@ -560,7 +559,7 @@
                 <div class="card card-white rot-left" id="card-calendar">
                     <div class="tape"></div>
                     <div class="card-header-flex">
-                        <div class="card-title">📅 TODAY'S CALENDAR</div>
+                        <div class="card-title">✦ TODAY'S CALENDAR</div>
                     </div>
                     <div class="calendar-header" id="calMonthYear">July 2026</div>
                     <div class="calendar-grid" id="calendarDays"></div>
@@ -570,7 +569,7 @@
                 <div class="card card-black rot-right" id="card-about" onclick="handleCardClick(this, event)">
                     <div class="tape"></div>
                     <div class="card-header-flex">
-                        <div class="card-title">♡ ABOUT ME</div>
+                        <div class="card-title">✦ ABOUT ME</div>
                         <span class="edit-btn" onclick="enableCardEdit(this, event)">✦</span>
                     </div>
                     <ul class="scrap-list">
@@ -584,7 +583,7 @@
                 <div class="card card-white rot-right" id="card-things" onclick="handleCardClick(this, event)">
                     <div class="tape"></div>
                     <div class="card-header-flex">
-                        <div class="card-title">🎤 THINGS I LOVE</div>
+                        <div class="card-title">✦ THINGS I LOVE</div>
                         <span class="edit-btn" onclick="enableCardEdit(this, event)">✦</span>
                     </div>
                     <ul class="scrap-list">
@@ -598,7 +597,7 @@
                 <div class="card card-pink rot-left" id="card-healing" onclick="handleCardClick(this, event)">
                     <div class="tape"></div>
                     <div class="card-header-flex">
-                        <div class="card-title">🌸 MY JOURNEY</div>
+                        <div class="card-title">✦ MY JOURNEY</div>
                         <span class="edit-btn" onclick="enableCardEdit(this, event)">✦</span>
                     </div>
                     <ul class="scrap-list">
@@ -612,14 +611,14 @@
             <div class="column col-center" id="card-center-col">
                 <div class="hero-wrapper">
                     <img src="girl.png" alt="Character" class="hero-girl" id="heroImg" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80';">
-                    <div class="photo-upload-badge" onclick="triggerPhotoSelect()">📷 Change Photo</div>
+                    <div class="photo-upload-badge" onclick="triggerPhotoSelect()">✦ Change Photo</div>
                 </div>
 
                 <!-- Main Quote Card -->
                 <div class="card card-white center-quote-card" onclick="handleCardClick(this, event)">
                     <div class="tape"></div>
                     <div class="card-header-flex">
-                        <div class="card-title">✨ MY PHILOSOPHY</div>
+                        <div class="card-title">✦ MY PHILOSOPHY</div>
                         <span class="edit-btn" onclick="enableCardEdit(this, event)">✦</span>
                     </div>
                     <p class="handwritten-quote">
@@ -635,7 +634,7 @@
                 <div class="card card-pink rot-right" id="card-todo">
                     <div class="tape"></div>
                     <div class="card-header-flex">
-                        <div class="card-title">✍️ DAILY TO-DO LIST</div>
+                        <div class="card-title">✦ DAILY TO-DO LIST</div>
                     </div>
                     <div class="todo-input-box" onclick="event.stopPropagation()">
                         <input type="text" id="todoInput" placeholder="Add new task...">
@@ -648,7 +647,7 @@
                 <div class="card card-black rot-left" id="card-strengths" onclick="handleCardClick(this, event)">
                     <div class="tape"></div>
                     <div class="card-header-flex">
-                        <div class="card-title">👑 MY STRENGTHS</div>
+                        <div class="card-title">✦ MY STRENGTHS</div>
                         <span class="edit-btn" onclick="enableCardEdit(this, event)">✦</span>
                     </div>
                     <ul class="scrap-list">
@@ -661,7 +660,7 @@
                 <div class="card card-white rot-right" id="card-goals" onclick="handleCardClick(this, event)">
                     <div class="tape"></div>
                     <div class="card-header-flex">
-                        <div class="card-title">📌 FUTURE GOALS</div>
+                        <div class="card-title">✦ FUTURE GOALS</div>
                         <span class="edit-btn" onclick="enableCardEdit(this, event)">✦</span>
                     </div>
                     <ul class="scrap-list">
@@ -675,12 +674,12 @@
                 <div class="card card-pink rot-left" id="card-fashion" onclick="handleCardClick(this, event)">
                     <div class="tape"></div>
                     <div class="card-header-flex">
-                        <div class="card-title">👠 MY STYLE & VIBE</div>
+                        <div class="card-title">✦ MY STYLE & VIBE</div>
                         <span class="edit-btn" onclick="enableCardEdit(this, event)">✦</span>
                     </div>
                     <ul class="scrap-list">
                         <li>Classic & Elegant</li>
-                        <li>Main Character Energy ♡</li>
+                        <li>Main Character Energy ✦</li>
                     </ul>
                 </div>
 
@@ -701,13 +700,13 @@
     <div class="modal-overlay" id="themeModal" onclick="closeThemeModal()">
         <div class="modal-card" onclick="event.stopPropagation()">
             <button class="modal-close" onclick="closeThemeModal()">&times;</button>
-            <div class="customizer-title">🎨 Select Color Theme</div>
+            <div class="customizer-title">✦ Select Color Theme</div>
             <div class="picker-grid">
-                <div class="picker-btn" onclick="setTheme('theme-cream-white')">☁️ Cream White</div>
-                <div class="picker-btn" onclick="setTheme('theme-pastel-pink')">🌸 Pastel Pink</div>
-                <div class="picker-btn" onclick="setTheme('theme-pastel-blue')">🩵 Pastel Blue</div>
-                <div class="picker-btn" onclick="setTheme('theme-sleek-black')">🖤 Sleek Black</div>
-                <div class="picker-btn" onclick="setTheme('theme-pastel-beige')">🌾 Pastel Beige</div>
+                <div class="picker-btn" onclick="setTheme('theme-cream-white')">✦ Cream White</div>
+                <div class="picker-btn" onclick="setTheme('theme-pastel-pink')">✦ Pastel Pink</div>
+                <div class="picker-btn" onclick="setTheme('theme-pastel-blue')">✦ Pastel Blue</div>
+                <div class="picker-btn" onclick="setTheme('theme-sleek-black')">✦ Sleek Black</div>
+                <div class="picker-btn" onclick="setTheme('theme-pastel-beige')">✦ Pastel Beige</div>
             </div>
         </div>
     </div>
@@ -716,10 +715,23 @@
     <div class="modal-overlay" id="fontModal" onclick="closeFontModal()">
         <div class="modal-card" onclick="event.stopPropagation()">
             <button class="modal-close" onclick="closeFontModal()">&times;</button>
-            <div class="customizer-title">🔤 Customize Typography</div>
+            <div class="customizer-title">✦ Customize Typography</div>
             
             <div class="customizer-section">
-                <label class="customizer-label">Headers & Titles Font:</label>
+                <label class="customizer-label">✦ Main Header & Top Quote Font:</label>
+                <select class="font-select" id="mainTitleFontSelect" onchange="applyMainTitleFont(this.value)">
+                    <option value="'Caveat', cursive">Caveat (Handwritten Original)</option>
+                    <option value="'Playfair Display', serif">Playfair Display (Serif)</option>
+                    <option value="'Montserrat', sans-serif">Montserrat (Clean)</option>
+                    <option value="'Quicksand', sans-serif">Quicksand (Soft Modern)</option>
+                    <option value="'Pacifico', cursive">Pacifico (Retro Script)</option>
+                    <option value="'Cinzel', serif">Cinzel (Classic Elegant)</option>
+                    <option value="'Fira Code', monospace">Fira Code (Tech Aesthetic)</option>
+                </select>
+            </div>
+
+            <div class="customizer-section">
+                <label class="customizer-label">✦ Card Headers Font:</label>
                 <select class="font-select" id="headerFontSelect" onchange="applyHeaderFont(this.value)">
                     <option value="'Playfair Display', serif">Playfair Display (Original)</option>
                     <option value="'Caveat', cursive">Caveat (Handwritten)</option>
@@ -732,7 +744,7 @@
             </div>
 
             <div class="customizer-section">
-                <label class="customizer-label">Body Text & Inside Boxes Font:</label>
+                <label class="customizer-label">✦ Body Text & Inside Boxes Font:</label>
                 <select class="font-select" id="bodyFontSelect" onchange="applyBodyFont(this.value)">
                     <option value="'Montserrat', sans-serif">Montserrat (Original)</option>
                     <option value="'Caveat', cursive">Caveat (Handwritten)</option>
@@ -827,27 +839,35 @@
             closeThemeModal();
         }
 
-        // Load Default or Saved Theme
         const savedTheme = localStorage.getItem('dreamCanvasTheme');
         if (savedTheme !== null) { 
             setTheme(savedTheme); 
         } else {
-            // Force Default Cream White on first load
             setTheme('theme-cream-white');
         }
 
         function openFontModal() { document.getElementById('fontModal').style.display = 'flex'; }
         function closeFontModal() { document.getElementById('fontModal').style.display = 'none'; }
 
+        function applyMainTitleFont(fontFamily) {
+            document.documentElement.style.setProperty('--font-main-title', fontFamily);
+            localStorage.setItem('dreamCanvasMainTitleFont', fontFamily);
+        }
+
         function applyHeaderFont(fontFamily) {
             document.documentElement.style.setProperty('--font-title', fontFamily);
-            document.documentElement.style.setProperty('--font-hand', fontFamily);
             localStorage.setItem('dreamCanvasHeaderFont', fontFamily);
         }
 
         function applyBodyFont(fontFamily) {
             document.documentElement.style.setProperty('--font-body', fontFamily);
             localStorage.setItem('dreamCanvasBodyFont', fontFamily);
+        }
+
+        const savedMainTitleFont = localStorage.getItem('dreamCanvasMainTitleFont');
+        if (savedMainTitleFont) {
+            applyMainTitleFont(savedMainTitleFont);
+            document.getElementById('mainTitleFontSelect').value = savedMainTitleFont;
         }
 
         const savedHeaderFont = localStorage.getItem('dreamCanvasHeaderFont');
@@ -875,9 +895,9 @@
             const status = document.getElementById('musicStatus');
 
             if (audio.paused) {
-                audio.play(); disk.classList.add('spinning'); status.innerText = "Playing 🎵";
+                audio.play(); disk.classList.add('spinning'); status.innerHTML = 'Playing <span style="color:var(--accent-gold)">✦</span>';
             } else {
-                audio.pause(); disk.classList.remove('spinning'); status.innerText = "Play Music 🎵";
+                audio.pause(); disk.classList.remove('spinning'); status.innerHTML = 'Play Music <span style="color:var(--accent-gold)">✦</span>';
             }
         }
 
@@ -890,7 +910,7 @@
                 document.getElementById('musicSub').innerText = "Custom Song ✨";
                 audio.play();
                 document.getElementById('vinylDisk').classList.add('spinning');
-                document.getElementById('musicStatus').innerText = "Playing 🎵";
+                document.getElementById('musicStatus').innerHTML = 'Playing <span style="color:var(--accent-gold)">✦</span>';
             }
         }
 
@@ -941,17 +961,17 @@
                         document.getElementById('weatherCity').innerText = "Local Sky";
                         
                         let statusText = "Sunny Clear";
-                        let emoji = "☀️";
+                        let iconSymbol = "☼";
                         currentWeatherType = "sunny";
                         
                         if (weather.weathercode >= 1 && weather.weathercode <= 3) {
-                            statusText = "Partly Cloudy"; emoji = "⛅"; currentWeatherType = "cloudy";
+                            statusText = "Partly Cloudy"; iconSymbol = "☁"; currentWeatherType = "cloudy";
                         } else if (weather.weathercode >= 51) {
-                            statusText = "Gentle Rain"; emoji = "🌧️"; currentWeatherType = "rainy";
+                            statusText = "Gentle Rain"; iconSymbol = "✦"; currentWeatherType = "rainy";
                         }
 
                         document.getElementById('weatherDesc').innerText = statusText;
-                        document.getElementById('weatherIcon').innerText = emoji;
+                        document.getElementById('weatherIcon').innerText = iconSymbol;
 
                     } catch (e) {
                         document.getElementById('weatherTemp').innerText = "28°C";
@@ -970,7 +990,7 @@
         function toggleDarkMode() {
             document.body.classList.toggle('dark-mode');
             const btn = document.getElementById('modeBtn');
-            btn.innerHTML = document.body.classList.contains('dark-mode') ? "☀️ Light" : "🌙 Dark";
+            btn.innerHTML = document.body.classList.contains('dark-mode') ? '<span class="gold-icon">✦</span> Light' : '<span class="gold-icon">✦</span> Dark';
         }
 
         function renderCalendar() {

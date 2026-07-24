@@ -12,33 +12,33 @@
 
     <style>
         :root {
-            /* DEFAULT PASTEL PINK THEME */
-            --bg-color: #fceef2;
+            /* DEFAULT THEME: CREAM WHITE ☁️ */
+            --bg-color: #fdfbf7;
             --card-white: #fffdfb;
-            --card-pink: #f8d7e0;
+            --card-pink: #f4eee5;
             --card-black: #1e1c1b;
             --text-color: #2b2b2b;
             --accent-gold: #c5a059;
             --font-title: 'Playfair Display', serif;
             --font-hand: 'Caveat', cursive;
             --font-body: 'Montserrat', sans-serif;
+            --shadow-soft: 0 8px 20px rgba(180, 170, 150, 0.12);
+            --tape-color: rgba(230, 225, 210, 0.75);
+        }
+
+        /* OTHER THEMES PRESETS */
+        body.theme-pastel-pink {
+            --bg-color: #fceef2;
+            --card-pink: #f8d7e0;
             --shadow-soft: 0 8px 20px rgba(220, 150, 170, 0.12);
             --tape-color: rgba(230, 200, 210, 0.75);
         }
 
-        /* THEMES PRESETS */
         body.theme-pastel-blue {
             --bg-color: #eaf4f8;
             --card-pink: #d0e8f2;
             --shadow-soft: 0 8px 20px rgba(150, 190, 210, 0.15);
             --tape-color: rgba(200, 225, 235, 0.75);
-        }
-
-        body.theme-cream-white {
-            --bg-color: #fdfbf7;
-            --card-pink: #f4eee5;
-            --shadow-soft: 0 8px 20px rgba(180, 170, 150, 0.12);
-            --tape-color: rgba(230, 225, 210, 0.75);
         }
 
         body.theme-sleek-black {
@@ -91,7 +91,7 @@
             color: var(--text-color);
             padding: 20px 10px 80px 10px;
             transition: background-color 0.3s ease, color 0.3s ease;
-            background-image: radial-gradient(rgba(225, 175, 190, 0.25) 1px, transparent 0);
+            background-image: radial-gradient(rgba(200, 200, 180, 0.2) 1px, transparent 0);
             background-size: 24px 24px;
             -webkit-overflow-scrolling: touch;
         }
@@ -100,12 +100,12 @@
             position: absolute;
             border-radius: 50%;
             filter: blur(50px);
-            opacity: 0.45;
+            opacity: 0.35;
             pointer-events: none;
             z-index: 0;
         }
 
-        .blob-1 { width: 300px; height: 300px; background: #f7cad0; top: -50px; left: -80px; }
+        .blob-1 { width: 300px; height: 300px; background: #ebdccb; top: -50px; left: -80px; }
         .blob-2 { width: 320px; height: 320px; background: #fae1dd; bottom: 100px; right: -100px; }
 
         /* ATMOSPHERIC SCREEN EFFECTS */
@@ -285,20 +285,20 @@
 
         .edit-btn {
             width: 22px; height: 22px;
-            background: rgba(248, 215, 224, 0.45);
+            background: rgba(230, 225, 210, 0.45);
             border: 1px solid rgba(197, 160, 89, 0.35);
             border-radius: 50%;
             display: inline-flex; align-items: center; justify-content: center;
             font-size: 0.62rem; color: var(--accent-gold);
             cursor: pointer;
-            box-shadow: 0 2px 6px rgba(220, 150, 170, 0.15);
+            box-shadow: 0 2px 6px rgba(180, 170, 150, 0.15);
             transition: transform 0.2s, background 0.2s, opacity 0.2s;
             flex-shrink: 0;
             user-select: none;
             opacity: 0.38;
         }
 
-        .edit-btn:hover { transform: scale(1.18) rotate(12deg); background: #f7cad0; opacity: 1; }
+        .edit-btn:hover { transform: scale(1.18) rotate(12deg); background: rgba(220, 210, 195, 0.7); opacity: 1; }
 
         /* DESKTOP 3-COLUMN GRID LAYOUT */
         .main-layout {
@@ -317,7 +317,7 @@
             border-radius: 6px;
             box-shadow: var(--shadow-soft);
             position: relative;
-            border: 1px solid rgba(220, 150, 170, 0.15);
+            border: 1px solid rgba(180, 170, 150, 0.15);
             transition: transform 0.2s ease, box-shadow 0.2s ease;
             cursor: pointer;
             width: 100%;
@@ -328,7 +328,7 @@
         .card[data-editing="true"] { user-select: text !important; -webkit-user-select: text !important; }
 
         .card-white { background: var(--card-white); color: var(--text-color); }
-        .card-pink { background: var(--card-pink); color: var(--text-color); border-color: rgba(220, 150, 170, 0.25); }
+        .card-pink { background: var(--card-pink); color: var(--text-color); border-color: rgba(180, 170, 150, 0.25); }
         .card-black { background: var(--card-black); color: #ffffff; border: none; }
         .card-black .card-title { color: #ffffff; border-bottom-color: #333; }
 
@@ -380,7 +380,7 @@
 
         ul.scrap-list li::before { content: "✦"; position: absolute; left: 0; color: var(--accent-gold); }
 
-        /* CENTER COLUMN */
+        /* CENTER COLUMN HERO & PHOTO UPLOADER */
         .col-center { display: flex; flex-direction: column; align-items: center; width: 100%; }
 
         .hero-wrapper {
@@ -389,19 +389,35 @@
 
         .hero-girl {
             width: 100%; height: auto; max-height: 500px; object-fit: contain;
-            filter: drop-shadow(0 15px 30px rgba(180, 120, 140, 0.25));
+            filter: drop-shadow(0 15px 30px rgba(180, 170, 150, 0.2));
             transition: transform 0.2s ease;
         }
 
+        /* AESTHETIC & TRANSPARENT PHOTO UPLOAD BADGE 📷 */
         .photo-upload-badge {
             position: absolute; bottom: 15px; right: 15px;
-            background: var(--card-white); border: 1px solid var(--accent-gold);
-            padding: 5px 12px; border-radius: 20px; font-size: 0.72rem; font-weight: 600;
-            cursor: pointer; box-shadow: var(--shadow-soft); transition: transform 0.2s;
+            /* Translucent Glass-morphism Style */
+            background: rgba(255, 253, 251, 0.3);
+            border: 1px solid rgba(197, 160, 89, 0.4);
+            -webkit-backdrop-filter: blur(4px);
+            backdrop-filter: blur(4px);
+            
+            padding: 5px 12px; border-radius: 20px;
+            font-size: 0.72rem; font-weight: 600; color: var(--accent-gold);
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(180, 170, 150, 0.1);
+            transition: transform 0.2s, background 0.2s, opacity 0.2s;
             display: flex; align-items: center; gap: 4px;
+            
+            /* Initial Semi-Transparency */
+            opacity: 0.5;
         }
 
-        .photo-upload-badge:hover { transform: scale(1.08); }
+        .photo-upload-badge:hover {
+            transform: scale(1.08);
+            background: rgba(255, 253, 251, 0.65);
+            opacity: 1; /* Fully visible on hover */
+        }
 
         .center-quote-card { width: 100%; text-align: center; margin-top: 10px; z-index: 5; }
         .handwritten-quote { font-family: var(--font-hand); font-size: 1.45rem; line-height: 1.3; }
@@ -687,9 +703,9 @@
             <button class="modal-close" onclick="closeThemeModal()">&times;</button>
             <div class="customizer-title">🎨 Select Color Theme</div>
             <div class="picker-grid">
-                <div class="picker-btn" onclick="setTheme('')">🌸 Pastel Pink</div>
-                <div class="picker-btn" onclick="setTheme('theme-pastel-blue')">🩵 Pastel Blue</div>
                 <div class="picker-btn" onclick="setTheme('theme-cream-white')">☁️ Cream White</div>
+                <div class="picker-btn" onclick="setTheme('theme-pastel-pink')">🌸 Pastel Pink</div>
+                <div class="picker-btn" onclick="setTheme('theme-pastel-blue')">🩵 Pastel Blue</div>
                 <div class="picker-btn" onclick="setTheme('theme-sleek-black')">🖤 Sleek Black</div>
                 <div class="picker-btn" onclick="setTheme('theme-pastel-beige')">🌾 Pastel Beige</div>
             </div>
@@ -811,8 +827,14 @@
             closeThemeModal();
         }
 
+        // Load Default or Saved Theme
         const savedTheme = localStorage.getItem('dreamCanvasTheme');
-        if (savedTheme !== null) { setTheme(savedTheme); }
+        if (savedTheme !== null) { 
+            setTheme(savedTheme); 
+        } else {
+            // Force Default Cream White on first load
+            setTheme('theme-cream-white');
+        }
 
         function openFontModal() { document.getElementById('fontModal').style.display = 'flex'; }
         function closeFontModal() { document.getElementById('fontModal').style.display = 'none'; }

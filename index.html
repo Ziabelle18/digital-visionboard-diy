@@ -915,7 +915,7 @@
         }
 
         function changeMusicUrl() {
-            const newUrl = prompt("I-paste ang audio URL (.mp3 link) para sa vinyl player:", document.getElementById('bgMusic').src);
+            const newUrl = prompt("Enter custom MP3 audio URL for the vinyl player:", document.getElementById('bgMusic').src);
             if (newUrl && newUrl.trim() !== '') {
                 const audio = document.getElementById('bgMusic');
                 audio.src = newUrl.trim();

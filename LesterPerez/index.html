@@ -253,6 +253,7 @@
             transition: transform 0.2s, background 0.2s, opacity 0.2s;
             flex-shrink: 0;
             user-select: none;
+            -webkit-user-select: none;
             opacity: 0.38;
         }
 
@@ -511,9 +512,9 @@
     <div class="board-container">
 
         <header class="header">
-            <h1>my vision board <span class="edit-btn" onclick="enableTextEdit(this)">✦</span></h1>
+            <h1><span class="editable-text">my vision board</span> <span class="edit-btn" contenteditable="false" onclick="enableTextEdit(this)">✦</span></h1>
             <br>
-            <p class="quote">"Type your favorite quote here..." <span class="edit-btn" onclick="enableTextEdit(this)">✦</span></p>
+            <p class="quote"><span class="editable-text">"Type your favorite quote here..."</span> <span class="edit-btn" contenteditable="false" onclick="enableTextEdit(this)">✦</span></p>
         </header>
 
         <div class="main-layout">
@@ -536,7 +537,7 @@
                     <div class="tape"></div>
                     <div class="card-header-flex">
                         <div class="card-title">✦ ABOUT ME</div>
-                        <span class="edit-btn" onclick="enableCardEdit(this, event)">✦</span>
+                        <span class="edit-btn" contenteditable="false" onclick="enableCardEdit(this, event)">✦</span>
                     </div>
                     <ul class="scrap-list">
                         <li>Click ✦ button to edit this item</li>
@@ -550,7 +551,7 @@
                     <div class="tape"></div>
                     <div class="card-header-flex">
                         <div class="card-title">✦ THINGS I LOVE</div>
-                        <span class="edit-btn" onclick="enableCardEdit(this, event)">✦</span>
+                        <span class="edit-btn" contenteditable="false" onclick="enableCardEdit(this, event)">✦</span>
                     </div>
                     <ul class="scrap-list">
                         <li>My favorite hobbies</li>
@@ -564,7 +565,7 @@
                     <div class="tape"></div>
                     <div class="card-header-flex">
                         <div class="card-title">✦ MY JOURNEY</div>
-                        <span class="edit-btn" onclick="enableCardEdit(this, event)">✦</span>
+                        <span class="edit-btn" contenteditable="false" onclick="enableCardEdit(this, event)">✦</span>
                     </div>
                     <ul class="scrap-list">
                         <li>Daily peaceful reminders</li>
@@ -585,7 +586,7 @@
                     <div class="tape"></div>
                     <div class="card-header-flex">
                         <div class="card-title">✦ MY PHILOSOPHY</div>
-                        <span class="edit-btn" onclick="enableCardEdit(this, event)">✦</span>
+                        <span class="edit-btn" contenteditable="false" onclick="enableCardEdit(this, event)">✦</span>
                     </div>
                     <p class="handwritten-quote">
                         "Your inspiring handwritten quote goes here..."
@@ -614,7 +615,7 @@
                     <div class="tape"></div>
                     <div class="card-header-flex">
                         <div class="card-title">✦ MY STRENGTHS</div>
-                        <span class="edit-btn" onclick="enableCardEdit(this, event)">✦</span>
+                        <span class="edit-btn" contenteditable="false" onclick="enableCardEdit(this, event)">✦</span>
                     </div>
                     <ul class="scrap-list">
                         <li>Strength #1</li>
@@ -627,7 +628,7 @@
                     <div class="tape"></div>
                     <div class="card-header-flex">
                         <div class="card-title">✦ FUTURE GOALS</div>
-                        <span class="edit-btn" onclick="enableCardEdit(this, event)">✦</span>
+                        <span class="edit-btn" contenteditable="false" onclick="enableCardEdit(this, event)">✦</span>
                     </div>
                     <ul class="scrap-list">
                         <li>Goal #1 for this year</li>
@@ -641,7 +642,7 @@
                     <div class="tape"></div>
                     <div class="card-header-flex">
                         <div class="card-title">✦ MY STYLE & VIBE</div>
-                        <span class="edit-btn" onclick="enableCardEdit(this, event)">✦</span>
+                        <span class="edit-btn" contenteditable="false" onclick="enableCardEdit(this, event)">✦</span>
                     </div>
                     <ul class="scrap-list">
                         <li>Classic & Elegant</li>
@@ -808,13 +809,13 @@
         }
 
         function enableTextEdit(btn) {
-            const parent = btn.parentElement;
-            if (parent.isContentEditable) {
-                parent.removeAttribute('contenteditable');
+            const target = btn.previousElementSibling || btn.parentElement;
+            if (target.isContentEditable) {
+                target.removeAttribute('contenteditable');
                 btn.innerText = "✦";
             } else {
-                parent.setAttribute('contenteditable', 'true');
-                parent.focus();
+                target.setAttribute('contenteditable', 'true');
+                target.focus();
                 btn.innerText = "💾";
             }
         }
@@ -1026,4 +1027,3 @@
     </script>
 </body>
 </html>
-

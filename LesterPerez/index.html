@@ -10,6 +10,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Cinzel+Decorative:wght@600;700&family=Cinzel:wght@600;700&family=Fira+Code:wght@400;500&family=Montserrat:wght@400;500;600&family=Pacifico&family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
 
+    <!-- Firebase SDKs (Modular Script via CDN) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
     <style>
         :root {
             /* DEFAULT THEME: CREAM WHITE */
@@ -512,9 +516,9 @@
     <div class="board-container">
 
         <header class="header">
-            <h1><span class="editable-text">my vision board</span> <span class="edit-btn" contenteditable="false" onclick="enableTextEdit(this)">✦</span></h1>
+            <h1><span class="editable-text" id="mainTitleText">my vision board</span> <span class="edit-btn" contenteditable="false" onclick="enableHeaderEdit(this, 'mainTitleText')">✦</span></h1>
             <br>
-            <p class="quote"><span class="editable-text">"Type your favorite quote here..."</span> <span class="edit-btn" contenteditable="false" onclick="enableTextEdit(this)">✦</span></p>
+            <p class="quote"><span class="editable-text" id="mainQuoteText">"Type your favorite quote here..."</span> <span class="edit-btn" contenteditable="false" onclick="enableHeaderEdit(this, 'mainQuoteText')">✦</span></p>
         </header>
 
         <div class="main-layout">
@@ -582,7 +586,7 @@
                 </div>
 
                 <!-- Main Quote Card -->
-                <div class="card card-white center-quote-card" onclick="handleCardClick(this, event)">
+                <div class="card card-white center-quote-card" id="card-philosophy" onclick="handleCardClick(this, event)">
                     <div class="tape"></div>
                     <div class="card-header-flex">
                         <div class="card-title">✦ MY PHILOSOPHY</div>
@@ -729,8 +733,35 @@
         </div>
     </div>
 
+    <!-- JAVASCRIPT WITH FIREBASE CLOUD SYNC -->
     <script>
-        // Load YouTube IFrame API Dynamically
+        /* FIREBASE CONFIGURATION */
+        const firebaseConfig = {
+            databaseURL: "https://pettags-36165-default-rtdb.firebaseio.com"
+        };
+
+        let db = null;
+        if (firebaseConfig.databaseURL && firebaseConfig.databaseURL !== "YOUR_FIREBASE_DATABASE_URL_HERE") {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.database();
+        }
+
+        /* AUTOMATIC UNIQUE ID FROM FOLDER NAME */
+        function getFolderKey() {
+            const pathParts = window.location.pathname.split('/').filter(p => p.length > 0);
+            if (pathParts.length > 0) {
+                const lastPart = pathParts[pathParts.length - 1];
+                if (lastPart.includes('.html')) {
+                    return pathParts.length > 1 ? pathParts[pathParts.length - 2] : "default_board";
+                }
+                return lastPart;
+            }
+            return "default_board";
+        }
+
+        const currentBoardId = getFolderKey();
+
+        // YouTube IFrame API
         let ytPlayer = null;
         let isYtReady = false;
         let activeMusicType = 'mp3';
@@ -792,7 +823,7 @@
 
         function closeModal() { document.getElementById('modalOverlay').style.display = 'none'; }
 
-        // 2. Text Editing
+        // 2. Text Editing & Saving
         function enableCardEdit(btn, event) {
             event.stopPropagation();
             const card = btn.closest('.card');
@@ -801,6 +832,7 @@
                 card.dataset.editing = "false";
                 card.querySelectorAll('[contenteditable]').forEach(el => el.removeAttribute('contenteditable'));
                 btn.innerText = "✦"; btn.style.width = "22px";
+                saveVisionBoardToCloud();
             } else {
                 card.dataset.editing = "true";
                 const title = card.querySelector('.card-title');
@@ -811,11 +843,12 @@
             }
         }
 
-        function enableTextEdit(btn) {
-            const target = btn.previousElementSibling || btn.parentElement;
+        function enableHeaderEdit(btn, targetId) {
+            const target = document.getElementById(targetId);
             if (target.isContentEditable) {
                 target.removeAttribute('contenteditable');
                 btn.innerText = "✦";
+                saveVisionBoardToCloud();
             } else {
                 target.setAttribute('contenteditable', 'true');
                 target.focus();
@@ -833,14 +866,11 @@
                 reader.onload = function(e) {
                     const imgData = e.target.result;
                     document.getElementById('heroImg').src = imgData;
-                    localStorage.setItem('dreamCanvasUserPhoto', imgData);
+                    saveVisionBoardToCloud();
                 };
                 reader.readAsDataURL(file);
             }
         }
-
-        const savedPhoto = localStorage.getItem('dreamCanvasUserPhoto');
-        if (savedPhoto) { document.getElementById('heroImg').src = savedPhoto; }
 
         // 4. Themes & Fonts Customizers
         function openThemeModal() { document.getElementById('themeModal').style.display = 'flex'; }
@@ -849,15 +879,8 @@
         function setTheme(themeClass) {
             document.body.className = document.body.className.replace(/theme-\S+/g, '').trim();
             if (themeClass) { document.body.classList.add(themeClass); }
-            localStorage.setItem('dreamCanvasTheme', themeClass);
             closeThemeModal();
-        }
-
-        const savedTheme = localStorage.getItem('dreamCanvasTheme');
-        if (savedTheme !== null) { 
-            setTheme(savedTheme); 
-        } else {
-            setTheme('theme-cream-white');
+            saveVisionBoardToCloud();
         }
 
         function openFontModal() { document.getElementById('fontModal').style.display = 'flex'; }
@@ -865,51 +888,20 @@
 
         function applyMainTitleFont(fontFamily) {
             document.documentElement.style.setProperty('--font-main-title', fontFamily);
-            localStorage.setItem('dreamCanvasMainTitleFont', fontFamily);
+            saveVisionBoardToCloud();
         }
 
         function applyHeaderFont(fontFamily) {
             document.documentElement.style.setProperty('--font-title', fontFamily);
-            localStorage.setItem('dreamCanvasHeaderFont', fontFamily);
+            saveVisionBoardToCloud();
         }
 
         function applyBodyFont(fontFamily) {
             document.documentElement.style.setProperty('--font-body', fontFamily);
-            localStorage.setItem('dreamCanvasBodyFont', fontFamily);
+            saveVisionBoardToCloud();
         }
 
-        const savedMainTitleFont = localStorage.getItem('dreamCanvasMainTitleFont');
-        if (savedMainTitleFont) {
-            applyMainTitleFont(savedMainTitleFont);
-            document.getElementById('mainTitleFontSelect').value = savedMainTitleFont;
-        }
-
-        const savedHeaderFont = localStorage.getItem('dreamCanvasHeaderFont');
-        if (savedHeaderFont) {
-            applyHeaderFont(savedHeaderFont);
-            document.getElementById('headerFontSelect').value = savedHeaderFont;
-        }
-
-        const savedBodyFont = localStorage.getItem('dreamCanvasBodyFont');
-        if (savedBodyFont) {
-            applyBodyFont(savedBodyFont);
-            document.getElementById('bodyFontSelect').value = savedBodyFont;
-        }
-
-        // 5. Dual Music Player (YouTube & Direct MP3)
-        const savedMusicUrl = localStorage.getItem('dreamCanvasCustomSong');
-        if (savedMusicUrl) {
-            const ytId = getYouTubeId(savedMusicUrl);
-            if (ytId) {
-                activeMusicType = 'youtube';
-                document.getElementById('musicSub').innerText = "YouTube Track ✨";
-            } else {
-                activeMusicType = 'mp3';
-                document.getElementById('bgMusic').src = savedMusicUrl;
-                document.getElementById('musicSub').innerText = "Custom Song ✨";
-            }
-        }
-
+        // 5. Dual Music Player
         function toggleMusic() {
             const disk = document.getElementById('vinylDisk');
             const status = document.getElementById('musicStatus');
@@ -932,31 +924,35 @@
         }
 
         function changeMusicUrl() {
-            const newUrl = prompt("Enter custom MP3 audio URL for the vinyl player:", localStorage.getItem('dreamCanvasCustomSong') || "");
+            const currentSong = localStorage.getItem('vb_music_' + currentBoardId) || "";
+            const newUrl = prompt("Enter custom MP3 audio URL or YouTube link for the vinyl player:", currentSong);
             if (newUrl && newUrl.trim() !== '') {
                 const trimmed = newUrl.trim();
-                localStorage.setItem('dreamCanvasCustomSong', trimmed);
+                applyMusic(trimmed);
+                saveVisionBoardToCloud();
+            }
+        }
 
-                const ytId = getYouTubeId(trimmed);
-                const audio = document.getElementById('bgMusic');
+        function applyMusic(url) {
+            const ytId = getYouTubeId(url);
+            const audio = document.getElementById('bgMusic');
 
-                if (ytId) {
-                    audio.pause();
-                    activeMusicType = 'youtube';
-                    document.getElementById('musicSub').innerText = "YouTube Track ✨";
-                    if (ytPlayer && isYtReady) {
-                        ytPlayer.loadVideoById(ytId);
-                        ytPlayer.playVideo();
-                    }
-                } else {
-                    if (ytPlayer && isYtReady) { ytPlayer.stopVideo(); }
-                    activeMusicType = 'mp3';
-                    audio.src = trimmed;
-                    document.getElementById('musicSub').innerText = "Custom Song ✨";
-                    audio.play();
-                    document.getElementById('vinylDisk').classList.add('spinning');
-                    document.getElementById('musicStatus').innerHTML = 'Playing <span style="color:var(--accent-gold)">✦</span>';
+            if (ytId) {
+                audio.pause();
+                activeMusicType = 'youtube';
+                document.getElementById('musicSub').innerText = "YouTube Track ✨";
+                if (ytPlayer && isYtReady) {
+                    ytPlayer.loadVideoById(ytId);
+                    ytPlayer.playVideo();
                 }
+            } else {
+                if (ytPlayer && isYtReady) { ytPlayer.stopVideo(); }
+                activeMusicType = 'mp3';
+                audio.src = url;
+                document.getElementById('musicSub').innerText = "Custom Song ✨";
+                audio.play();
+                document.getElementById('vinylDisk').classList.add('spinning');
+                document.getElementById('musicStatus').innerHTML = 'Playing <span style="color:var(--accent-gold)">✦</span>';
             }
         }
 
@@ -965,6 +961,7 @@
             document.body.classList.toggle('dark-mode');
             const btn = document.getElementById('modeBtn');
             btn.innerHTML = document.body.classList.contains('dark-mode') ? '<span class="gold-icon">✦</span> Light' : '<span class="gold-icon">✦</span> Dark';
+            saveVisionBoardToCloud();
         }
 
         function renderCalendar() {
@@ -993,7 +990,7 @@
         }
 
         // 7. To-Do List
-        let todos = JSON.parse(localStorage.getItem('myVisionTodosTemplate')) || ["Add your first task here ✦"];
+        let todos = ["Add your first task here ✦"];
 
         function renderTodos() {
             const container = document.getElementById('todoContainer');
@@ -1006,7 +1003,6 @@
                     </div>
                 `;
             });
-            localStorage.setItem('myVisionTodosTemplate', JSON.stringify(todos));
         }
 
         function addTodo() {
@@ -1015,17 +1011,118 @@
                 todos.push(input.value.trim());
                 input.value = '';
                 renderTodos();
+                saveVisionBoardToCloud();
             }
         }
 
         function toggleTodo(index) {
             todos.splice(index, 1);
             renderTodos();
+            saveVisionBoardToCloud();
+        }
+
+        /* --- CLOUD SYNC & FIREBASE DATA FUNCTIONS --- */
+        function getVisionBoardData() {
+            const cardsData = {};
+            document.querySelectorAll('.card[id]').forEach(card => {
+                if (card.id !== 'card-calendar' && card.id !== 'card-todo') {
+                    cardsData[card.id] = card.innerHTML;
+                }
+            });
+
+            return {
+                mainTitle: document.getElementById('mainTitleText').innerText,
+                mainQuote: document.getElementById('mainQuoteText').innerText,
+                heroImg: document.getElementById('heroImg').src,
+                themeClass: document.body.className,
+                isDarkMode: document.body.classList.contains('dark-mode'),
+                mainTitleFont: getComputedStyle(document.documentElement).getPropertyValue('--font-main-title'),
+                headerFont: getComputedStyle(document.documentElement).getPropertyValue('--font-title'),
+                bodyFont: getComputedStyle(document.documentElement).getPropertyValue('--font-body'),
+                musicUrl: localStorage.getItem('vb_music_' + currentBoardId) || "",
+                todos: todos,
+                cards: cardsData
+            };
+        }
+
+        function saveVisionBoardToCloud() {
+            const data = getVisionBoardData();
+            localStorage.setItem('visionBoard_' + currentBoardId, JSON.stringify(data));
+
+            if (db) {
+                db.ref('visionboards/' + currentBoardId).set(data);
+            }
+        }
+
+        function applyVisionBoardData(data) {
+            if (!data) return;
+
+            if (data.mainTitle) document.getElementById('mainTitleText').innerText = data.mainTitle;
+            if (data.mainQuote) document.getElementById('mainQuoteText').innerText = data.mainQuote;
+            if (data.heroImg) document.getElementById('heroImg').src = data.heroImg;
+            if (data.themeClass) document.body.className = data.themeClass;
+            
+            if (data.isDarkMode) {
+                document.body.classList.add('dark-mode');
+                document.getElementById('modeBtn').innerHTML = '<span class="gold-icon">✦</span> Light';
+            }
+
+            if (data.mainTitleFont) {
+                document.documentElement.style.setProperty('--font-main-title', data.mainTitleFont);
+                document.getElementById('mainTitleFontSelect').value = data.mainTitleFont.trim();
+            }
+            if (data.headerFont) {
+                document.documentElement.style.setProperty('--font-title', data.headerFont);
+                document.getElementById('headerFontSelect').value = data.headerFont.trim();
+            }
+            if (data.bodyFont) {
+                document.documentElement.style.setProperty('--font-body', data.bodyFont);
+                document.getElementById('bodyFontSelect').value = data.bodyFont.trim();
+            }
+
+            if (data.musicUrl) {
+                localStorage.setItem('vb_music_' + currentBoardId, data.musicUrl);
+                applyMusic(data.musicUrl);
+            }
+
+            if (data.todos) {
+                todos = data.todos;
+                renderTodos();
+            }
+
+            if (data.cards) {
+                Object.keys(data.cards).forEach(cardId => {
+                    const cardElem = document.getElementById(cardId);
+                    if (cardElem) {
+                        cardElem.innerHTML = data.cards[cardId];
+                    }
+                });
+            }
+        }
+
+        function loadVisionBoardFromCloud() {
+            // LocalStorage for fast initial view
+            const localData = localStorage.getItem('visionBoard_' + currentBoardId);
+            if (localData) {
+                try { applyVisionBoardData(JSON.parse(localData)); } catch(e){}
+            }
+
+            // Realtime Sync from Firebase
+            if (db) {
+                db.ref('visionboards/' + currentBoardId).once('value').then(snapshot => {
+                    if (snapshot.exists()) {
+                        const cloudData = snapshot.val();
+                        applyVisionBoardData(cloudData);
+                        localStorage.setItem('visionBoard_' + currentBoardId, JSON.stringify(cloudData));
+                    }
+                }).catch(err => console.warn("Offline mode active:", err));
+            }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
             renderCalendar();
             renderTodos();
+            loadVisionBoardFromCloud();
         });
     </script>
 </body>

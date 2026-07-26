@@ -856,7 +856,7 @@
             }
         }
 
-        // 3. Image Upload (BUILT-IN CANVAS IMAGE COMPRESSOR)
+        // 3. Image Upload (WITH PNG TRANSPARENCY SUPPORT)
         function triggerPhotoSelect() { document.getElementById('heroImageInput').click(); }
 
         function handleImageUpload(event) {
@@ -881,10 +881,12 @@
                         canvas.width = width;
                         canvas.height = height;
 
+                        // Clear canvas to keep transparency
+                        ctx.clearRect(0, 0, width, height);
                         ctx.drawImage(img, 0, 0, width, height);
 
-                        // Compression setting (0.7 quality para sa napakagandang linaw habang maliit ang size)
-                        const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                        // Save as PNG to maintain transparent background
+                        const compressedDataUrl = canvas.toDataURL('image/png');
                         document.getElementById('heroImg').src = compressedDataUrl;
                         saveVisionBoardToCloud();
                     };

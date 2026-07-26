@@ -353,12 +353,28 @@
             width: 100%; text-align: center; cursor: pointer; position: relative; user-select: none;
         }
 
+        /* SMOOTH & ANTI-FLICKER VIDEO/IMAGE RENDERER */
         .hero-girl, .hero-video {
             width: 100%; height: auto; max-height: 500px; object-fit: contain;
             filter: drop-shadow(0 15px 30px rgba(180, 170, 150, 0.2));
-            transition: transform 0.2s ease;
+            transition: transform 0.2s ease, filter 0.3s ease;
             display: block; margin: 0 auto;
-            mix-blend-mode: multiply; /* SEAMLESS BLENDING (NO WHITE BOX) */
+            
+            /* Anti-lag hardware acceleration to prevent blinking */
+            transform: translateZ(0);
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            
+            /* DYNAMIC LIGHT THEME BLENDING */
+            mix-blend-mode: multiply; 
+        }
+
+        /* DARK MODE DYNAMIC ADJUSTMENT - PREVENTS INVISIBLE / WASHED OUT HERO MEDIA */
+        body.dark-mode .hero-girl, 
+        body.dark-mode .hero-video {
+            mix-blend-mode: normal !important;
+            filter: drop-shadow(0 15px 30px rgba(0, 0, 0, 0.5));
+            border-radius: 8px;
         }
 
         .hero-video { pointer-events: none; }

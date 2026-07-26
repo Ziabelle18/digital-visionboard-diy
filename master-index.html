@@ -754,7 +754,7 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT WITH REALTIME TRANSPARENT VIDEO RENDER ENGINE & RELIABLE STORAGE -->
+    <!-- JAVASCRIPT WITH INDEXEDDB MEDIA VAULT & REALTIME RENDER ENGINE -->
     <script>
         /* FIREBASE CONFIGURATION */
         const firebaseConfig = {
@@ -781,6 +781,42 @@
         }
 
         const currentBoardId = getFolderKey();
+
+        /* INDEXEDDB LARGE MEDIA STORAGE ENGINE */
+        const idbReq = indexedDB.open("VisionBoardMediaDB", 1);
+        let idb = null;
+
+        idbReq.onupgradeneeded = function(e) {
+            idb = e.target.result;
+            if (!idb.objectStoreNames.contains("media")) {
+                idb.createObjectStore("media");
+            }
+        };
+
+        idbReq.onsuccess = function(e) {
+            idb = e.target.result;
+            loadVisionBoardFromCloud();
+        };
+
+        function saveMediaToIDB(key, val) {
+            if (!idb) return;
+            const tx = idb.transaction("media", "readwrite");
+            const store = tx.objectStore("media");
+            store.put(val, key);
+        }
+
+        function getMediaFromIDB(key, callback) {
+            if (!idb) return callback(null);
+            const tx = idb.transaction("media", "readonly");
+            const store = tx.objectStore("media");
+            const req = store.get(key);
+            req.onsuccess = function() {
+                callback(req.result);
+            };
+            req.onerror = function() {
+                callback(null);
+            };
+        }
 
         // YouTube IFrame API
         let ytPlayer = null;
@@ -896,7 +932,7 @@
                 const frame = ctx.getImageData(0, 0, canvasEl.width, canvasEl.height);
                 const l = frame.data.length;
 
-                // Strict Chroma-Key Threshold for White Removal without modifying RGB values
+                // Absolute Chroma Key Algorithm (Pure Background Purge)
                 for (let i = 0; i < l; i += 4) {
                     const r = frame.data[i];
                     const g = frame.data[i + 1];
@@ -1188,15 +1224,21 @@
         function saveVisionBoardToCloud() {
             const data = getVisionBoardData();
             
-            try {
-                localStorage.setItem('visionBoard_' + currentBoardId, JSON.stringify(data));
-                sessionStorage.setItem('vb_latest_media_' + currentBoardId, JSON.stringify({
-                    heroVid: data.heroVid,
-                    heroImg: data.heroImg
-                }));
-            } catch (e) {
-                console.warn("Storage cap reached locally, syncing via Firebase Cloud.");
+            // Save Heavy Media directly to IndexedDB Vault
+            if (data.heroVid) {
+                saveMediaToIDB('heroVid_' + currentBoardId, data.heroVid);
+            } else if (data.heroImg) {
+                saveMediaToIDB('heroImg_' + currentBoardId, data.heroImg);
             }
+
+            // Save Lightweight Board Structure to LocalStorage
+            const lightData = Object.assign({}, data);
+            delete lightData.heroVid; 
+            delete lightData.heroImg;
+
+            try {
+                localStorage.setItem('visionBoard_' + currentBoardId, JSON.stringify(lightData));
+            } catch (e) {}
 
             if (db) {
                 db.ref('visionboards/' + currentBoardId).set(data);
@@ -1259,16 +1301,18 @@
         }
 
         function loadVisionBoardFromCloud() {
-            // Immediate Session Sync to eliminate flash of old uploads
-            const sessionMedia = sessionStorage.getItem('vb_latest_media_' + currentBoardId);
-            if (sessionMedia) {
-                try {
-                    const parsed = JSON.parse(sessionMedia);
-                    if (parsed.heroVid) setHeroMedia(parsed.heroVid, true);
-                    else if (parsed.heroImg) setHeroMedia(parsed.heroImg, false);
-                } catch(e){}
-            }
+            // First Priority: Instant Media Load from IndexedDB Vault
+            getMediaFromIDB('heroVid_' + currentBoardId, function(vidData) {
+                if (vidData) {
+                    setHeroMedia(vidData, true);
+                } else {
+                    getMediaFromIDB('heroImg_' + currentBoardId, function(imgData) {
+                        if (imgData) setHeroMedia(imgData, false);
+                    });
+                }
+            });
 
+            // LocalStorage for text layout & themes
             const localData = localStorage.getItem('visionBoard_' + currentBoardId);
             if (localData) {
                 try { applyVisionBoardData(JSON.parse(localData)); } catch(e){}
@@ -1280,13 +1324,12 @@
                     if (snapshot.exists()) {
                         const cloudData = snapshot.val();
                         applyVisionBoardData(cloudData);
-                        try {
-                            localStorage.setItem('visionBoard_' + currentBoardId, JSON.stringify(cloudData));
-                            sessionStorage.setItem('vb_latest_media_' + currentBoardId, JSON.stringify({
-                                heroVid: cloudData.heroVid,
-                                heroImg: cloudData.heroImg
-                            }));
-                        } catch(e){}
+                        
+                        if (cloudData.heroVid) {
+                            saveMediaToIDB('heroVid_' + currentBoardId, cloudData.heroVid);
+                        } else if (cloudData.heroImg) {
+                            saveMediaToIDB('heroImg_' + currentBoardId, cloudData.heroImg);
+                        }
                     }
                 }).catch(err => console.warn("Offline mode active:", err));
             }
@@ -1295,7 +1338,6 @@
         document.addEventListener('DOMContentLoaded', () => {
             renderCalendar();
             renderTodos();
-            loadVisionBoardFromCloud();
         });
     </script>
 </body>

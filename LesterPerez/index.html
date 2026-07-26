@@ -353,7 +353,7 @@
             width: 100%; text-align: center; cursor: pointer; position: relative; user-select: none;
         }
 
-        /* CANVAS PROCESSOR FOR 100% TRUE TRANSPARENT MP4 VIDEO */
+        /* CANVAS PROCESSOR FOR IMAGES & VIDEOS */
         .hero-girl, .hero-canvas {
             width: 100%; height: auto; max-height: 500px; object-fit: contain;
             filter: drop-shadow(0 15px 30px rgba(180, 170, 150, 0.2));
@@ -363,7 +363,7 @@
             mix-blend-mode: normal !important;
         }
 
-        /* ABSOLUTE DARK MODE COLOR ISOLATION FOR CANVAS & IMAGE */
+        /* ABSOLUTE DARK MODE ISOLATION */
         body.dark-mode .hero-canvas,
         body.dark-mode .hero-girl {
             filter: drop-shadow(0 15px 30px rgba(0,0,0,0.4)) !important;
@@ -805,6 +805,13 @@
             store.put(val, key);
         }
 
+        function clearMediaFromIDB(key) {
+            if (!idb) return;
+            const tx = idb.transaction("media", "readwrite");
+            const store = tx.objectStore("media");
+            store.delete(key);
+        }
+
         function getMediaFromIDB(key, callback) {
             if (!idb) return callback(null);
             const tx = idb.transaction("media", "readonly");
@@ -932,15 +939,15 @@
                 const frame = ctx.getImageData(0, 0, canvasEl.width, canvasEl.height);
                 const l = frame.data.length;
 
-                // Absolute Chroma Key Algorithm (Pure Background Purge)
+                // Smart White-Detection (Only removes pure/near white background, leaves colored video intact)
                 for (let i = 0; i < l; i += 4) {
                     const r = frame.data[i];
                     const g = frame.data[i + 1];
                     const b = frame.data[i + 2];
 
-                    if (r > 215 && g > 215 && b > 215) {
-                        frame.data[i + 3] = 0; // Pure Transparent
-                    } else if (r > 190 && g > 190 && b > 190) {
+                    if (r > 222 && g > 222 && b > 222) {
+                        frame.data[i + 3] = 0; // Transparent White
+                    } else if (r > 200 && g > 200 && b > 200) {
                         const avg = (r + g + b) / 3;
                         const alpha = Math.max(0, (255 - avg) * 3);
                         if (alpha < frame.data[i + 3]) {
@@ -1224,11 +1231,13 @@
         function saveVisionBoardToCloud() {
             const data = getVisionBoardData();
             
-            // Save Heavy Media directly to IndexedDB Vault
+            // Save Heavy Media directly to IndexedDB Vault and purge conflicting cache
             if (data.heroVid) {
                 saveMediaToIDB('heroVid_' + currentBoardId, data.heroVid);
+                clearMediaFromIDB('heroImg_' + currentBoardId);
             } else if (data.heroImg) {
                 saveMediaToIDB('heroImg_' + currentBoardId, data.heroImg);
+                clearMediaFromIDB('heroVid_' + currentBoardId);
             }
 
             // Save Lightweight Board Structure to LocalStorage
@@ -1327,8 +1336,10 @@
                         
                         if (cloudData.heroVid) {
                             saveMediaToIDB('heroVid_' + currentBoardId, cloudData.heroVid);
+                            clearMediaFromIDB('heroImg_' + currentBoardId);
                         } else if (cloudData.heroImg) {
                             saveMediaToIDB('heroImg_' + currentBoardId, cloudData.heroImg);
+                            clearMediaFromIDB('heroVid_' + currentBoardId);
                         }
                     }
                 }).catch(err => console.warn("Offline mode active:", err));

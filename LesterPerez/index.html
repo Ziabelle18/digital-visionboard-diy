@@ -362,6 +362,14 @@
             background: transparent !important;
         }
 
+        /* DARK MODE ISOLATION - PREVENTS CHARACTER COLOR MUTATION */
+        body.dark-mode .hero-canvas,
+        body.dark-mode .hero-girl {
+            filter: drop-shadow(0 15px 30px rgba(0,0,0,0.4)) !important;
+            mix-blend-mode: normal !important;
+            isolation: isolate;
+        }
+
         .hero-video-hidden {
             display: none !important;
             position: absolute;
@@ -745,7 +753,7 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT WITH REALTIME TRANSPARENT VIDEO RENDERER & FIREBASE CLOUD SYNC -->
+    <!-- JAVASCRIPT WITH REALTIME TRANSPARENT VIDEO RENDER ENGINE & RELIABLE STORAGE -->
     <script>
         /* FIREBASE CONFIGURATION */
         const firebaseConfig = {
@@ -872,6 +880,7 @@
         function triggerPhotoSelect() { document.getElementById('heroImageInput').click(); }
 
         let videoAnimFrame = null;
+        let activeHeroVidUrl = "";
 
         function renderTransparentVideoFrame(videoEl, canvasEl, ctx) {
             if (videoEl.paused || videoEl.ended) return;
@@ -892,10 +901,10 @@
                     const g = frame.data[i + 1];
                     const b = frame.data[i + 2];
 
-                    // Remove pixels near pure white/cream (R, G, B > 220)
-                    if (r > 220 && g > 220 && b > 220) {
+                    // Remove pixels near pure white/cream (R, G, B > 215)
+                    if (r > 215 && g > 215 && b > 215) {
                         frame.data[i + 3] = 0; // Make 100% transparent
-                    } else if (r > 195 && g > 195 && b > 195) {
+                    } else if (r > 190 && g > 190 && b > 190) {
                         // Soft edge anti-alias blending
                         const avg = (r + g + b) / 3;
                         const alpha = Math.max(0, (255 - avg) * 3);
@@ -920,6 +929,7 @@
             const badge = container.querySelector('.photo-upload-badge');
 
             if (isVideo) {
+                activeHeroVidUrl = mediaUrl;
                 container.innerHTML = `
                     <video src="${mediaUrl}" id="heroVidSrc" class="hero-video-hidden" autoplay loop muted playsinline crossorigin="anonymous"></video>
                     <canvas id="heroCanvas" class="hero-canvas"></canvas>
@@ -935,6 +945,7 @@
 
                 vid.play().catch(() => {});
             } else {
+                activeHeroVidUrl = "";
                 container.innerHTML = `
                     <img src="${mediaUrl}" alt="Character" class="hero-girl" id="heroImg" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80';">
                 `;
@@ -1158,13 +1169,12 @@
             });
 
             const heroImgEl = document.getElementById('heroImg');
-            const heroVidEl = document.getElementById('heroVidSrc');
 
             return {
                 mainTitle: document.getElementById('mainTitleText').innerText,
                 mainQuote: document.getElementById('mainQuoteText').innerText,
                 heroImg: heroImgEl ? heroImgEl.src : "",
-                heroVid: heroVidEl ? heroVidEl.src : "",
+                heroVid: activeHeroVidUrl,
                 themeClass: document.body.className,
                 isDarkMode: document.body.classList.contains('dark-mode'),
                 mainTitleFont: getComputedStyle(document.documentElement).getPropertyValue('--font-main-title'),
@@ -1178,7 +1188,12 @@
 
         function saveVisionBoardToCloud() {
             const data = getVisionBoardData();
-            localStorage.setItem('visionBoard_' + currentBoardId, JSON.stringify(data));
+            
+            try {
+                localStorage.setItem('visionBoard_' + currentBoardId, JSON.stringify(data));
+            } catch (e) {
+                console.warn("Storage cap reached locally, syncing via Firebase Cloud.");
+            }
 
             if (db) {
                 db.ref('visionboards/' + currentBoardId).set(data);
@@ -1250,7 +1265,9 @@
                     if (snapshot.exists()) {
                         const cloudData = snapshot.val();
                         applyVisionBoardData(cloudData);
-                        localStorage.setItem('visionBoard_' + currentBoardId, JSON.stringify(cloudData));
+                        try {
+                            localStorage.setItem('visionBoard_' + currentBoardId, JSON.stringify(cloudData));
+                        } catch(e){}
                     }
                 }).catch(err => console.warn("Offline mode active:", err));
             }

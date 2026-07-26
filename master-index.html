@@ -346,18 +346,21 @@
 
         ul.scrap-list li::before { content: "✦"; position: absolute; left: 0; color: var(--accent-gold); }
 
-        /* CENTER COLUMN HERO & PHOTO UPLOADER */
+        /* CENTER COLUMN HERO & PHOTO/VIDEO UPLOADER */
         .col-center { display: flex; flex-direction: column; align-items: center; width: 100%; }
 
         .hero-wrapper {
             width: 100%; text-align: center; cursor: pointer; position: relative; user-select: none;
         }
 
-        .hero-girl {
+        .hero-girl, .hero-video {
             width: 100%; height: auto; max-height: 500px; object-fit: contain;
             filter: drop-shadow(0 15px 30px rgba(180, 170, 150, 0.2));
             transition: transform 0.2s ease;
+            display: block; margin: 0 auto;
         }
+
+        .hero-video { pointer-events: none; }
 
         /* AESTHETIC TRANSPARENT PHOTO UPLOAD BADGE */
         .photo-upload-badge {
@@ -374,6 +377,7 @@
             transition: transform 0.2s, background 0.2s, opacity 0.2s;
             display: flex; align-items: center; gap: 4px;
             opacity: 0.55;
+            z-index: 10;
         }
 
         .photo-upload-badge:hover {
@@ -470,7 +474,7 @@
 
             .main-layout { display: flex; flex-direction: column; gap: 18px; }
             .column { display: contents; }
-            .hero-girl { width: 100%; max-height: 440px; }
+            .hero-girl, .hero-video { width: 100%; max-height: 440px; }
 
             #card-center-col { order: 1; display: flex; flex-direction: column; align-items: center; width: 100%; }
             #card-calendar   { order: 2; width: 100%; }
@@ -493,7 +497,8 @@
     <audio id="bgMusic" loop src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3"></audio>
     <div id="ytPlayerContainer"></div>
 
-    <input type="file" id="heroImageInput" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
+    <!-- FILE INPUT ACCEPTING IMAGES, GIFS & VIDEOS -->
+    <input type="file" id="heroImageInput" accept="image/*,.gif,video/mp4,video/webm" style="display: none;" onchange="handleImageUpload(event)">
 
     <!-- TOP CONTROLS BAR -->
     <div class="top-controls">
@@ -580,7 +585,7 @@
 
             <!-- GITNANG COLUMN -->
             <div class="column col-center" id="card-center-col">
-                <div class="hero-wrapper">
+                <div class="hero-wrapper" id="heroMediaContainer">
                     <img src="girl.png" alt="Character" class="hero-girl" id="heroImg" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80';">
                     <div class="photo-upload-badge" onclick="triggerPhotoSelect()">✦ Change Photo</div>
                 </div>
@@ -856,43 +861,83 @@
             }
         }
 
-        // 3. Image Upload (WITH PNG TRANSPARENCY SUPPORT)
+        // 3. Image, GIF & Video Upload Handler (NO-HANG & NO-LAG)
         function triggerPhotoSelect() { document.getElementById('heroImageInput').click(); }
+
+        function setHeroMedia(mediaUrl, isVideo = false) {
+            const container = document.getElementById('heroMediaContainer');
+            const badge = container.querySelector('.photo-upload-badge');
+
+            if (isVideo) {
+                container.innerHTML = `
+                    <video src="${mediaUrl}" class="hero-video" id="heroVid" autoplay loop muted playsinline></video>
+                `;
+            } else {
+                container.innerHTML = `
+                    <img src="${mediaUrl}" alt="Character" class="hero-girl" id="heroImg" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80';">
+                `;
+            }
+            container.appendChild(badge);
+        }
 
         function handleImageUpload(event) {
             const file = event.target.files[0];
             if (file) {
+                // Prevent freeze: Limit file size to 8MB max for cloud safety
+                if (file.size > 8 * 1024 * 1024) {
+                    alert("Please select a file smaller than 8MB to keep your board fast!");
+                    return;
+                }
+
                 const reader = new FileReader();
-                reader.onload = function(e) {
-                    const img = new Image();
-                    img.onload = function() {
-                        const canvas = document.createElement('canvas');
-                        const ctx = canvas.getContext('2d');
-                        
-                        const maxWidth = 800; // Ideal size para malinaw at light sa Firebase
-                        let width = img.width;
-                        let height = img.height;
 
-                        if (width > maxWidth) {
-                            height = Math.round((height * maxWidth) / width);
-                            width = maxWidth;
-                        }
-
-                        canvas.width = width;
-                        canvas.height = height;
-
-                        // Clear canvas to keep transparency
-                        ctx.clearRect(0, 0, width, height);
-                        ctx.drawImage(img, 0, 0, width, height);
-
-                        // Save as PNG to maintain transparent background
-                        const compressedDataUrl = canvas.toDataURL('image/png');
-                        document.getElementById('heroImg').src = compressedDataUrl;
+                // Handles MP4 / WebM Videos (Auto-plays continuously like GIF)
+                if (file.type.startsWith('video/')) {
+                    reader.onload = function(e) {
+                        setHeroMedia(e.target.result, true);
                         saveVisionBoardToCloud();
                     };
-                    img.src = e.target.result;
-                };
-                reader.readAsDataURL(file);
+                    reader.readAsDataURL(file);
+                } 
+                // Handles Animated GIFs directly
+                else if (file.type === "image/gif") {
+                    reader.onload = function(e) {
+                        setHeroMedia(e.target.result, false);
+                        saveVisionBoardToCloud();
+                    };
+                    reader.readAsDataURL(file);
+                } 
+                // Handles Static PNG/JPG Photos with Canvas Compression & Transparency
+                else {
+                    reader.onload = function(e) {
+                        const img = new Image();
+                        img.onload = function() {
+                            const canvas = document.createElement('canvas');
+                            const ctx = canvas.getContext('2d');
+                            
+                            const maxWidth = 800;
+                            let width = img.width;
+                            let height = img.height;
+
+                            if (width > maxWidth) {
+                                height = Math.round((height * maxWidth) / width);
+                                width = maxWidth;
+                            }
+
+                            canvas.width = width;
+                            canvas.height = height;
+
+                            ctx.clearRect(0, 0, width, height);
+                            ctx.drawImage(img, 0, 0, width, height);
+
+                            const compressedDataUrl = canvas.toDataURL('image/png');
+                            setHeroMedia(compressedDataUrl, false);
+                            saveVisionBoardToCloud();
+                        };
+                        img.src = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
             }
         }
 
@@ -1054,10 +1099,14 @@
                 }
             });
 
+            const heroImgEl = document.getElementById('heroImg');
+            const heroVidEl = document.getElementById('heroVid');
+
             return {
                 mainTitle: document.getElementById('mainTitleText').innerText,
                 mainQuote: document.getElementById('mainQuoteText').innerText,
-                heroImg: document.getElementById('heroImg').src,
+                heroImg: heroImgEl ? heroImgEl.src : "",
+                heroVid: heroVidEl ? heroVidEl.src : "",
                 themeClass: document.body.className,
                 isDarkMode: document.body.classList.contains('dark-mode'),
                 mainTitleFont: getComputedStyle(document.documentElement).getPropertyValue('--font-main-title'),
@@ -1083,7 +1132,13 @@
 
             if (data.mainTitle) document.getElementById('mainTitleText').innerText = data.mainTitle;
             if (data.mainQuote) document.getElementById('mainQuoteText').innerText = data.mainQuote;
-            if (data.heroImg) document.getElementById('heroImg').src = data.heroImg;
+            
+            if (data.heroVid) {
+                setHeroMedia(data.heroVid, true);
+            } else if (data.heroImg) {
+                setHeroMedia(data.heroImg, false);
+            }
+
             if (data.themeClass) document.body.className = data.themeClass;
             
             if (data.isDarkMode) {

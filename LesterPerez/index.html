@@ -360,9 +360,10 @@
             transition: transform 0.2s ease;
             display: block; margin: 0 auto;
             background: transparent !important;
+            mix-blend-mode: normal !important;
         }
 
-        /* DARK MODE ISOLATION - PREVENTS CHARACTER COLOR MUTATION */
+        /* ABSOLUTE DARK MODE COLOR ISOLATION FOR CANVAS & IMAGE */
         body.dark-mode .hero-canvas,
         body.dark-mode .hero-girl {
             filter: drop-shadow(0 15px 30px rgba(0,0,0,0.4)) !important;
@@ -895,17 +896,15 @@
                 const frame = ctx.getImageData(0, 0, canvasEl.width, canvasEl.height);
                 const l = frame.data.length;
 
-                // Thresholding algorithm for White/Near-White MP4 Artifact Removal
+                // Strict Chroma-Key Threshold for White Removal without modifying RGB values
                 for (let i = 0; i < l; i += 4) {
                     const r = frame.data[i];
                     const g = frame.data[i + 1];
                     const b = frame.data[i + 2];
 
-                    // Remove pixels near pure white/cream (R, G, B > 215)
                     if (r > 215 && g > 215 && b > 215) {
-                        frame.data[i + 3] = 0; // Make 100% transparent
+                        frame.data[i + 3] = 0; // Pure Transparent
                     } else if (r > 190 && g > 190 && b > 190) {
-                        // Soft edge anti-alias blending
                         const avg = (r + g + b) / 3;
                         const alpha = Math.max(0, (255 - avg) * 3);
                         if (alpha < frame.data[i + 3]) {
@@ -1191,6 +1190,10 @@
             
             try {
                 localStorage.setItem('visionBoard_' + currentBoardId, JSON.stringify(data));
+                sessionStorage.setItem('vb_latest_media_' + currentBoardId, JSON.stringify({
+                    heroVid: data.heroVid,
+                    heroImg: data.heroImg
+                }));
             } catch (e) {
                 console.warn("Storage cap reached locally, syncing via Firebase Cloud.");
             }
@@ -1217,6 +1220,9 @@
             if (data.isDarkMode) {
                 document.body.classList.add('dark-mode');
                 document.getElementById('modeBtn').innerHTML = '<span class="gold-icon">✦</span> Light';
+            } else {
+                document.body.classList.remove('dark-mode');
+                document.getElementById('modeBtn').innerHTML = '<span class="gold-icon">✦</span> Dark';
             }
 
             if (data.mainTitleFont) {
@@ -1253,7 +1259,16 @@
         }
 
         function loadVisionBoardFromCloud() {
-            // LocalStorage for fast initial view
+            // Immediate Session Sync to eliminate flash of old uploads
+            const sessionMedia = sessionStorage.getItem('vb_latest_media_' + currentBoardId);
+            if (sessionMedia) {
+                try {
+                    const parsed = JSON.parse(sessionMedia);
+                    if (parsed.heroVid) setHeroMedia(parsed.heroVid, true);
+                    else if (parsed.heroImg) setHeroMedia(parsed.heroImg, false);
+                } catch(e){}
+            }
+
             const localData = localStorage.getItem('visionBoard_' + currentBoardId);
             if (localData) {
                 try { applyVisionBoardData(JSON.parse(localData)); } catch(e){}
@@ -1267,6 +1282,10 @@
                         applyVisionBoardData(cloudData);
                         try {
                             localStorage.setItem('visionBoard_' + currentBoardId, JSON.stringify(cloudData));
+                            sessionStorage.setItem('vb_latest_media_' + currentBoardId, JSON.stringify({
+                                heroVid: cloudData.heroVid,
+                                heroImg: cloudData.heroImg
+                            }));
                         } catch(e){}
                     }
                 }).catch(err => console.warn("Offline mode active:", err));
